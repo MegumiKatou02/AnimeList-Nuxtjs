@@ -20,6 +20,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.16"
+    "@types/lodash": "^4.17.16",
+    "vite-plugin-env-compatible": "^2.0.1"
   }
 }

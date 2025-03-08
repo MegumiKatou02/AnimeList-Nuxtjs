@@ -88,11 +88,10 @@ import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLoca
         router.push('/saved')
       }
       
-      const config = useRuntimeConfig()
       const loginUrl = computed(() => {
-        const clientID = config.public.discordCLientId
+        const clientID = import.meta.env.VITE_DISCORD_CLIENT_ID
         
-        const redirectUri = encodeURIComponent(config.public.discordRedirectUri)
+        const redirectUri = encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI)
   
         return `https://discord.com/oauth2/authorize?client_id=${clientID}&response_type=code&redirect_uri=${redirectUri}&scope=identify`
       })

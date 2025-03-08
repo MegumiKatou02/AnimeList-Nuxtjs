@@ -74,7 +74,7 @@
   import { defineComponent } from 'vue'
   import AnimatedNumber from '@/components/AnimatedNumber.vue'
   import WaifuShowcase from '@/components/WaifuShowcase.vue'
-  import { mainInformation } from '@/configs/config'
+  import { mainInformation } from '~/composables/configs/config'
   
   export default defineComponent({
     name: 'AboutView',

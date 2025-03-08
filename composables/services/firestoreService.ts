@@ -1,6 +1,6 @@
 import { doc, setDoc } from 'firebase/firestore'
-import { db } from '@/configs/firebase'
-import type { User } from '@/types/discord'
+import { db } from '../configs/firebase'
+import type { User } from '../types/discord'
 
 export const createUserInFirestore = async (user: User) => {
   const userRef = doc(db, 'users', user.id)

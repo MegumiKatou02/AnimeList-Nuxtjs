@@ -75,6 +75,7 @@
   import type { Manga } from '~/composables/types/manga'
   import { isDarkMode } from '~/composables/utils/settings'
   import { defineAsyncComponent } from 'vue'
+import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
   type MediaItem = Anime | Manga
   
@@ -309,7 +310,7 @@
   
       onMounted(async () => {
         window.scrollTo(0, 0)
-        const mediaType = localStorage.getItem('activeTab')
+        const mediaType = getLocalStorage('activeTab')
         handleMediaTypeChange(mediaType === 'anime' || mediaType === 'manga' ? mediaType : 'anime')
   
         if (route.query.q) {

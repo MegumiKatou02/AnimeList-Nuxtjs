@@ -6,23 +6,10 @@ import { ChineseStudios } from '../utils/studios'
 const BASE_URL = '/api'
 
 export class AnimeService {
-  private baseUrl: string
   private clientId: string
-  private api
-  
+
   constructor() {
-    this.baseUrl = '/api'
-    this.clientId = '39bd5673e38f2ddd2bae2518e57b5b04'
-    console.log(`|${this.clientId}|`);
-    
-  
-    this.api = axios.create({
-      baseURL: this.baseUrl,
-      headers: {
-        'X-MAL-CLIENT-ID': this.clientId,
-        // 'Content-Type': 'application/json',
-      },
-    })
+    this.clientId = import.meta.env.VITE_CLIENT_ID_MYANIMELIST
   }
 
   private getHeaders() {
@@ -32,18 +19,16 @@ export class AnimeService {
   }
 
   async getTopAnime(limit: number = 10): Promise<Anime[]> {
-    console.log('headers ne:', this.getHeaders());
-    
-    const response = await $fetch<{ data: { node: Anime }[] }>(`${BASE_URL}/anime/ranking`, {
+    const response = await axios.get(`${BASE_URL}/anime/ranking`, {
       headers: this.getHeaders(),
-      query: {
+      params: {
         ranking_type: 'all',
         limit,
         fields:
           'status,id,title,main_picture,mean,rank,popularity,synopsis,start_date,end_date,genres',
       },
     })
-    return response.data.map((item: { node: Anime }) => item.node)
+    return response.data.data.map((item: { node: Anime }) => item.node)
   }
 
   async searchAnime(query: string): Promise<Anime[]> {
@@ -89,7 +74,8 @@ export class AnimeService {
 
     try {
       const randomOffset = Math.floor(Math.random() * 101)
-      const response = await this.api.get(`/anime/ranking`, {
+      const response = await axios.get(`${BASE_URL}/anime/ranking`, {
+        headers: this.getHeaders(),
         params: {
           ranking_type: type,
           limit: 115,
@@ -99,8 +85,6 @@ export class AnimeService {
           offset: randomOffset,
         },
       })
-      console.log(response);
-      
 
       // Không lọc hết nổi mấy thằng tung của :(
       const isJapaneseAnime = (anime: Anime) => {

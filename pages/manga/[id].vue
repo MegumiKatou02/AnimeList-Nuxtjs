@@ -101,7 +101,7 @@
               Đọc trên MangaDex
             </a>
             <ChapterModal :chapters="chapters" />
-            <!-- <SaveModel @data="sendData" :type="'Manga'" /> -->
+            <SaveModel @data="sendData" :type="'Manga'" />
           </div>
         </div>
       </div>
@@ -116,16 +116,17 @@
   import ChapterModal from '~/components/ChapterModal.vue'
   import { isDarkMode } from '~/composables/utils/settings'
   import { onUnmounted } from 'vue'
-//   import SaveModel from '@/components/SaveModel.vue'
-//   import { saveToFirestore } from '@/services/firestoreService'
+  import SaveModel from '~/components/SaveModel.vue'
+  import { saveToFirestore } from '~/composables/services/firestoreService'
   import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import type { User } from '~/composables/types/discord'
+import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
   export default defineComponent({
     name: 'MangaDetail',
     components: {
       ChapterModal,
-    //   SaveModel,
+      SaveModel,
     },
     setup() {
       const route = useRoute()
@@ -137,28 +138,28 @@
       const chapters = ref<Chapter[]>([])
       const loading = ref(true)
   
-    //   const sendData = async () => {
-    //     let token = localStorage.getItem('discord_token')
+      const sendData = async () => {
+        let token = getLocalStorage('discord_token')
   
-    //     if (!(await checkToken(token)) || !localStorage.getItem('token_expiry')) {
-    //       // router.error
-    //       router.push({
-    //         path: '/error',
-    //         query: { message: 'Không tìm thấy mã xác thực' },
-    //       })
-    //       return
-    //     }
+        if (!(await checkToken(token)) || !getLocalStorage('token_expiry')) {
+          // router.error
+          router.push({
+            path: '/error',
+            query: { message: 'Không tìm thấy mã xác thực' },
+          })
+          return
+        }
   
-    //     const tokenExpiry = parseInt(localStorage.getItem('token_expiry') as string)
-    //     if (!token || Date.now() >= tokenExpiry) {
-    //       token = await refreshToken()
-    //     }
-    //     const user: User = await getDiscordUser(token)
-    //     const url = window.location.href
-    //     const id = manga.value?.id || (route.params.id as string)
+        const tokenExpiry = parseInt(getLocalStorage('token_expiry') as string)
+        if (!token || Date.now() >= tokenExpiry) {
+          token = await refreshToken()
+        }
+        const user: User = await getDiscordUser(token)
+        const url = window.location.href
+        const id = manga.value?.id || (route.params.id as string)
   
-    //     await saveToFirestore(user.id, 'manga', manga.value?.title || 'Ukknown', url, id)
-    //   }
+        await saveToFirestore(user.id, 'manga', manga.value?.title || 'Ukknown', url, id)
+      }
   
       const loadChapters = async () => {
         try {
@@ -247,7 +248,7 @@
       onUnmounted(() => {})
   
       return {
-        // sendData,
+        sendData,
         manga,
         newChapters,
         formatStatus,

@@ -55,7 +55,7 @@
   import { computed } from 'vue'
   import { defineComponent, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
-import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLocalStorage'
   export default defineComponent({
     name: 'LoginPage',
     setup(_, { emit }) {

@@ -121,7 +121,7 @@
   import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import type { User } from '~/composables/types/discord'
   import { getLocalStorage } from '~/composables/utils/useLocalStorage'
-import { fetchSettingsMode } from '~/composables/utils/settings'
+  import { fetchSettingsMode } from '~/composables/utils/settings'
   
   export default defineComponent({
     name: 'MangaDetail',

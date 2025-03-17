@@ -2,6 +2,7 @@
 import envCompatible from 'vite-plugin-env-compatible'
 
 export default defineNuxtConfig({
+  ssr: true,
   vite: {
     plugins: [envCompatible()],
   },

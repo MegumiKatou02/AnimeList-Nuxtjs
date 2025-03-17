@@ -1,7 +1,7 @@
 <template>
     <div class="app-container" :class="{ 'dark-mode': isDarkMode }">
-      <header >
-        <nav class="navbar">
+      <header v-if="showHeader">
+        <nav class="navbar" :class="{ 'reader-page': isReaderPage }">
           <router-link to="/home">
             <div class="nav-brand">
               <img
@@ -36,7 +36,7 @@
         <slot />
       </main>
   
-      <footer >
+      <footer v-if="showFooter">
         <div class="footer-content">
           <div class="footer-text">
             <p>Được hỗ trợ bởi</p>
@@ -68,8 +68,10 @@
     import { onMounted, onUnmounted, computed, defineComponent, ref, watchEffect } from 'vue'
     import { useHead } from "#imports";
     import Setting from '~/components/Setting.vue';
-    import { isDarkMode } from '~/composables/utils/settings';
+    // import { isDarkMode } from '~/composables/utils/settings';
     import Login from '~/components/Login.vue';
+    import type { SettingsResponse } from '~/composables/types/settings';
+import { fetchSettingsMode } from '~/composables/utils/settings';
   
   export default defineComponent({
     components: {
@@ -78,13 +80,18 @@
     },
     setup() {
       const route = useRoute()
-      // const isReaderPage = computed(() => route.path.startsWith('/read'))
+      
+      const showHeader = computed(() => route.meta.showHeader !== false)
+      const showFooter = computed(() => route.meta.showFooter !== false)
+      const isReaderPage = computed(() => route.path.startsWith('/read'))
       const isStatusPage = computed(() => {
         if (route.query.status && route.query.status === 'error') {
           return true
         }
         return false
       })
+
+      const isDarkMode = ref(false)
   
       const isOpenSetting = ref(false)
       const isOpenLogin = ref(false)
@@ -127,7 +134,9 @@
         return '/home'
       })
   
-      onMounted(() => {
+      onMounted(async () => {
+        isDarkMode.value = await fetchSettingsMode()
+        
         window.addEventListener('scroll', handleScroll)
       })
   
@@ -156,7 +165,9 @@
       });
   
       return {
-        // isReaderPage,
+        isReaderPage,
+        showHeader,
+        showFooter,
         isStatusPage,
         isOpenSetting,
         isOpenLogin,

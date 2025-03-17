@@ -91,7 +91,7 @@
   import { getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import type { User } from '~/composables/types/discord'
   import { isDarkMode } from '~/composables/utils/settings'
-import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
   interface Item {
     id: string

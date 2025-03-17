@@ -36,13 +36,14 @@
         </div>
       </div>
     </div>
-  </template>
+</template>
   
-  <script lang="ts">
+<script lang="ts">
   import { isDarkMode } from '~/composables/utils/settings'
   import { computed, watch } from 'vue'
   import { defineComponent, ref, onMounted } from 'vue'
-import { getLocalStorage, setLocalStorage } from '~/composables/utils/useLocalStorage'
+  // import { getLocalStorage, setLocalStorage } from '~/composables/utils/useLocalStorage'
+  import type { SettingsResponse } from '~/composables/types/settings'
   export default defineComponent({
     name: 'SettingPage',
     setup(_, { emit }) {
@@ -72,21 +73,51 @@ import { getLocalStorage, setLocalStorage } from '~/composables/utils/useLocalSt
         }
       })
   
-      const handleSave = () => {
-        if (typeof window !== 'undefined') {
-            setLocalStorage('setting', JSON.stringify(settings.value))
+      const handleSave = async () => {
+        // if (typeof window !== 'undefined') {
+        //     setLocalStorage('setting', JSON.stringify(settings.value))
+        // }
+        try {
+          
+          const lang = selectedLanguage.value === '0' ? 'vi' : 'en';
+          console.log('setup', lang);
+          await $fetch('/api/settings', {
+            method: 'POST',
+            body: {
+              isDarkMode: selectedTheme.value === '0',
+              lang: lang
+            }
+          })
+        } catch (error) {
+          console.error('Lỗi khi lưu settings:', error)
         }
         originDarkMode.value = isDarkMode.value
         closeDropDown()
+        window.location.reload();
       }
   
-      onMounted(() => {
-        const savedSettings = JSON.parse(
-          getLocalStorage('setting') || `{"lang":"0","theme":"0"}`,
-        )
-        selectedLanguage.value = savedSettings.lang
-        selectedTheme.value = savedSettings.theme
-        originDarkMode.value = isDarkMode.value
+      onMounted(async () => {
+        // const savedSettings = JSON.parse(
+        //   getLocalStorage('setting') || `{"lang":"0","theme":"0"}`,
+        // )
+        // selectedLanguage.value = savedSettings.lang
+        // selectedTheme.value = savedSettings.theme
+        // originDarkMode.value = isDarkMode.value
+        try {
+          const data = await $fetch<SettingsResponse>('/api/settings')
+          console.log(data);
+          
+
+          if (data) {
+            const lang = data.lang === 'vi' ? '0' : '1'
+            selectedLanguage.value = lang
+            selectedTheme.value = data.isDarkMode ? '0' : '1'
+            isDarkMode.value = data.isDarkMode
+            originDarkMode.value = isDarkMode.value
+          }
+        } catch (error) {
+          console.error('Lỗi khi tải settings:', error)
+        }
       })
   
       return {

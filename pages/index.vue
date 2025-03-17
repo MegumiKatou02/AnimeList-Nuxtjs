@@ -201,9 +201,11 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { mainInformation } from '~/composables/configs/config';
 
 definePageMeta({
-  layout: false,
-});
-
+  layout: false
+  // layout: 'default',
+  // showHeader: false,
+  // showFooter: true
+})
 const currentSlide = ref(0);
 const totalSlides = 4;
 let slideInterval: number | undefined;

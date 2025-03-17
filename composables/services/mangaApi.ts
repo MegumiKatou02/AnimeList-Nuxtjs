@@ -11,6 +11,7 @@ import type {
 } from '../types/manga'
 import { ArrayUtils } from '../utils/array'
 import { getLocalStorage } from '../utils/useLocalStorage'
+import type { SettingsResponse } from '../types/settings'
 
 export class MangaService {
   private baseUrl: string
@@ -185,8 +186,11 @@ export class MangaService {
    * @returns Viet Nam language trans
    */
   async getMangaChapters(mangaId: string): Promise<Chapter[]> {
-    const savedSettings = JSON.parse(getLocalStorage('setting') || `{"lang":"0","theme":"0"}`)
-    const lang = savedSettings.lang === '0' ? 'vi' : 'en'
+    // const savedSettings = JSON.parse(getLocalStorage('setting') || `{"lang":"0","theme":"0"}`)
+    // const lang = savedSettings.lang === '0' ? 'vi' : 'en'
+    const { lang } = await $fetch<SettingsResponse>('/api/settings')
+    // const lang = settings.lang || 'vi'
+    
     try {
       const response = await $fetch(`/api/mangadex/${mangaId}/feed`, {
         key: `manga-feed-${mangaId}`,
@@ -200,9 +204,9 @@ export class MangaService {
       
       const data: ChapterResponse = response
 
-      // if (!data || !data.data || !Array.isArray(data.data)) {
-      //   throw new Error('No valid chapters found in response')
-      // }
+      if (!data || !data.data || !Array.isArray(data.data)) {
+        throw new Error('No valid chapters found in response')
+      }
 
       return data.data.map((chapter) => {
         const group = chapter.relationships.find((rel) => rel.type === 'scanlation_group')

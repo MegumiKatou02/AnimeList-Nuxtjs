@@ -108,20 +108,16 @@
   import axios from 'axios'
   import moment from 'moment-timezone'
   import type { AnimeJikan, Character } from '~/composables/types/anime'
-  import { isDarkMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   import SaveModel from '@/components/SaveModel.vue'
   import type { User } from '~/composables/types/discord'
   import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import { saveToFirestore } from '~/composables/services/firestoreService'
   import { AnimeService } from '~/composables/services/animeApi'
-  // import { Date } from '~/composables/types/date'
-
-  interface Date {
-    day: number | null
-    month: number | null
-    year: number | null
-  }
+  import type { Date } from '~/composables/types/date'
+import { fetchSettingsMode } from '~/composables/utils/settings'
   
+  const isDarkMode = ref(false)
   const route = useRoute()
   const router = useRouter()
   const anime = ref<AnimeJikan | null>(null)
@@ -209,6 +205,7 @@
   onMounted(async () => {
     window.scrollTo(0, 0)
     try {
+      isDarkMode.value = await fetchSettingsMode()
       const animeId = route.params.id
   
       const animeResponse = await animeService.getAnimeDetail(animeId as string)
@@ -381,6 +378,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+    height: 400px;
   }
   
   .spinner {

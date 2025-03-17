@@ -28,9 +28,9 @@
     </div>
   </template>
   
-  <script lang="ts">
+<script lang="ts">
   import { defineComponent, ref, computed } from 'vue'
-import { getLocalStorage, setLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { getLocalStorage, setLocalStorage } from '~/composables/utils/useLocalStorage'
   
   export default defineComponent({
     name: 'MediaTypeSwitcher',

@@ -75,9 +75,9 @@
   import debounce from 'lodash/debounce'
   import type { Anime } from '~/composables/types/anime'
   import type { Manga } from '~/composables/types/manga'
-  import { isDarkMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   import { defineAsyncComponent } from 'vue'
-import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
   type MediaItem = Anime | Manga
   
@@ -97,6 +97,7 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
       const router = useRouter()
       const route = useRoute()
 
+      const isDarkMode = ref(false)
       const animeService = new AnimeService()
       const mangaService = new MangaService()
       const mediaList = ref<MediaItem[]>([])

@@ -1,8 +1,29 @@
 import { ref } from 'vue'
-import { defaultSettings } from './constants'
-import { getLocalStorage } from './useLocalStorage'
+import type { SettingsResponse } from '../types/settings'
 
-const savedSettings = JSON.parse(getLocalStorage('setting') || JSON.stringify(defaultSettings))
-const isDarkTheme = savedSettings.theme == '0' ? true : false
+export const isDarkMode = ref(false)
 
-export const isDarkMode = ref(isDarkTheme)
+export const fetchSettings = async () => {
+    try {
+      const { data } = await useFetch<SettingsResponse>('/api/settings')
+  
+      if (data.value) {
+        isDarkMode.value = data.value.isDarkMode
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải settings:', error)
+    }
+}
+
+export const fetchSettingsMode = async (): Promise<boolean> => {
+  try {
+    const res = await $fetch<SettingsResponse>('/api/settings')
+
+    return res.isDarkMode
+  } catch (error) {
+    console.error('Lỗi khi tải settings:', error)
+    return false;
+  }
+}
+
+fetchSettings()

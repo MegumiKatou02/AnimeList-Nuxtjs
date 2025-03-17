@@ -127,10 +127,12 @@
 <script lang="ts">
   import { ref, onMounted, computed, defineComponent, watch } from 'vue'
   import axios from 'axios'
-  import { isDarkMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   import { MangaService } from '~/composables/services/mangaApi'
   import { AnimeService } from '~/composables/services/animeApi'
   import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+  import type { SettingsResponse } from '~/composables/types/settings'
+  import { fetchSettingsMode } from '~/composables/utils/settings'
   
   interface AnimeGenre {
     mal_id: number
@@ -167,6 +169,8 @@
   export default defineComponent({
     emits: ['filter'],
     setup(_, { emit }) {
+      const isDarkMode = ref(false)
+
       const isOpen = ref(false)
       const activeTab = ref('status')
       const searchQuery = ref('')
@@ -371,6 +375,7 @@
         tabSwitch.value = getLocalStorage('activeTab') || 'anime'
         await fetchGenres()
         setupKeyboardShortcut()
+        isDarkMode.value = await fetchSettingsMode();
       })
   
       const isFilterActive = computed(() => {

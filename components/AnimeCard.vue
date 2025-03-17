@@ -32,12 +32,15 @@
   </template>
   
   <script setup lang="ts">
-  import { computed } from 'vue'
+  import { computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import type { PropType } from 'vue'
   import type { Anime } from '~/composables/types/anime'
-  import { isDarkMode } from '~/composables/utils/settings'
+  import { fetchSettingsMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   
+  const isDarkMode = ref(false)
+
   const router = useRouter()
   
   const props = defineProps({
@@ -63,11 +66,16 @@
   const goToAnimeDetail = () => {
     router.push(`/anime/${props.anime.id}`)
   }
+
+  onMounted(async () => {
+    isDarkMode.value = await fetchSettingsMode();
+  })
+
   </script>
   
   <style scoped>
   .anime-card {
-    border: 1px solid #ddd;
+    border: 1px solid #ddd; 
     border-radius: 8px;
     overflow: hidden;
     /* margin: 1rem;   */

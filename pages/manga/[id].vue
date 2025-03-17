@@ -114,13 +114,14 @@
   import type { Manga, Chapter } from '~/composables/types/manga'
   import { MangaService } from '~/composables/services/mangaApi'
   import ChapterModal from '~/components/ChapterModal.vue'
-  import { isDarkMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   import { onUnmounted } from 'vue'
   import SaveModel from '~/components/SaveModel.vue'
   import { saveToFirestore } from '~/composables/services/firestoreService'
   import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import type { User } from '~/composables/types/discord'
-import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+import { fetchSettingsMode } from '~/composables/utils/settings'
   
   export default defineComponent({
     name: 'MangaDetail',
@@ -129,6 +130,7 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
       SaveModel,
     },
     setup() {
+      const isDarkMode = ref(false)
       const route = useRoute()
       const router = useRouter()
       const mangaService = new MangaService()
@@ -243,6 +245,7 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
           // await Promise.all([loadMangaData(), loadChapters()])
           await loadMangaData();
           await loadChapters();
+          isDarkMode.value = await fetchSettingsMode()
         } catch (error) {
           console.error('Lỗi khi tải dữ liệu:', error)
         }
@@ -432,6 +435,7 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+    height: 400px;
   }
   
   .spinner {

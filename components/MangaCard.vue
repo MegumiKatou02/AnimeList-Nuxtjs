@@ -32,7 +32,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { PropType } from 'vue'
 import type { Manga } from '~/composables/types/manga'
-import { isDarkMode } from '~/composables/utils/settings'
+import { fetchSettingsMode } from '~/composables/utils/settings'
+// import { isDarkMode } from '~/composables/utils/settings'
 
 const props = defineProps({
   manga: {
@@ -40,6 +41,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const isDarkMode = ref(false)
 
 const router = useRouter()
 
@@ -61,6 +64,10 @@ const formatStatus = (status: string) => {
 const navigateToDetail = () => {
   router.push(`/manga/${props.manga.id}`)
 }
+
+onMounted(async () => {
+  isDarkMode.value = await fetchSettingsMode()
+})
 </script>
 
   

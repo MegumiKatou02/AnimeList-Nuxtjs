@@ -124,12 +124,13 @@
     </div>
   </template>
   
-  <script lang="ts">
+<script lang="ts">
   import { ref, onMounted, computed, defineComponent, watch } from 'vue'
   import axios from 'axios'
   import { isDarkMode } from '~/composables/utils/settings'
   import { MangaService } from '~/composables/services/mangaApi'
-import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { AnimeService } from '~/composables/services/animeApi'
+  import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
   interface AnimeGenre {
     mal_id: number
@@ -180,6 +181,7 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
       const tabSwitch = ref('anime')
       const lastSelectedGenre = ref<string | number | null>(null)
   
+      const animeService = new AnimeService()
       const mangaService = new MangaService()
   
       const animeStatuses: StatusOption[] = [
@@ -302,8 +304,9 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
             const response = await axios.get('https://api.jikan.moe/v4/genres/anime')
             genres.value = response.data.data as AnimeGenre[]
           } else if (tabSwitch.value === 'manga') {
-            const response = await mangaService.getTagsManga()
-            genres.value = response.data.data as MangaTag[]
+            const { data } = await mangaService.getTagsManga()
+           
+            genres.value = data as MangaTag[]
           }
         } catch (error) {
           console.error(`Error fetching ${tabSwitch.value} genres:`, error)

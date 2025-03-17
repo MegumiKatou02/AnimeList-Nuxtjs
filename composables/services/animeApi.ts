@@ -31,18 +31,17 @@ export class AnimeService {
     return response.data.data.map((item: { node: Anime }) => item.node)
   }
 
-  async searchAnime(query: string): Promise<Anime[]> {
-    const response = await axios.get(`${BASE_URL}/anime`, {
-      headers: this.getHeaders(),
-      params: {
-        q: query,
+  async searchAnime(query_search: string): Promise<Anime[]> {
+    const response = await $fetch(`/api/myanimelist/search`, {
+      query: {
+        q: query_search,  
         nsfw: true,
         limit: 100,
         fields:
           'status,id,alternative_titles,title,main_picture,mean,rank,popularity,synopsis,start_date,end_date,genres',
       },
     })
-    const animeData = response.data.data
+    const animeData = response.data
 
     return animeData.map((item: { node: Anime }) => item.node)
   }
@@ -74,9 +73,9 @@ export class AnimeService {
 
     try {
       const randomOffset = Math.floor(Math.random() * 101)
-      const response = await axios.get(`${BASE_URL}/anime/ranking`, {
-        headers: this.getHeaders(),
-        params: {
+      const response = await $fetch('/api/myanimelist/ranking', {
+        key: 'anime-ranking',
+        query: {
           ranking_type: type,
           limit: 115,
           nsfw: true,
@@ -95,8 +94,8 @@ export class AnimeService {
           anime.studios.every((studio: Studio) => !ChineseStudios.includes(studio.name))
         )
       }
-
-      let animeList = response.data.data
+      
+      let animeList = response.data
         .map((item: { node: Anime }) => item.node)
         .filter(isJapaneseAnime)
 

@@ -44,10 +44,12 @@ export class MangaService {
 
   async getMangaById(id: string): Promise<MangaData> {
     try {
-      const response = await this.api.get(`/manga/${id}`, {
-        params: { 'includes[]': ['cover_art', 'author'] },
+      const response = await $fetch(`/api/mangadex/${id}`, {
+        key: `manga-${id}`,
+        query: { 'includes[]': ['cover_art', 'author'] },
       })
-      const mangaData = response.data.data
+
+      const mangaData = response.data
 
       return mangaData
     } catch (error) {
@@ -76,8 +78,9 @@ export class MangaService {
     mangaId: string,
   ): Promise<{ rating: number; follows: number; comments: number }> {
     try {
-      const response = await this.api.get(`/statistics/manga/${mangaId}`)
-      const mangaStatistics = response.data.statistics[mangaId]
+      const response = await $fetch(`/api/mangadex/statistics/${mangaId}`)
+      
+      const mangaStatistics = response.statistics[mangaId]
 
       if (!mangaStatistics) {
         throw new Error('Statistics not found for this manga')
@@ -94,19 +97,18 @@ export class MangaService {
     }
   }
 
-  async searchManga(query: string): Promise<Manga[]> {
+  async searchManga(query_search: string): Promise<Manga[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/manga?limit=50&title=${encodeURIComponent(query)}&includes[]=cover_art`,
-        {
-          headers: {
-            Referer: 'https://mangadex.org',
-            'Cache-Control': 'no-cache',
-          },
-        },
-      )
-
-      const data = await response.json()
+      const response = await $fetch('/api/mangadex/search', {
+        key: 'manga-search',
+        query: {
+          limit: 50,
+          title: query_search,
+          'includes[]': 'cover_art'
+        }
+      })
+  
+      const data = response
 
       return this.transformMangaData(data.data)
     } catch (error) {
@@ -186,20 +188,21 @@ export class MangaService {
     const savedSettings = JSON.parse(getLocalStorage('setting') || `{"lang":"0","theme":"0"}`)
     const lang = savedSettings.lang === '0' ? 'vi' : 'en'
     try {
-      const response = await this.api.get(`/manga/${mangaId}/feed`, {
-        params: {
+      const response = await $fetch(`/api/mangadex/${mangaId}/feed`, {
+        key: `manga-feed-${mangaId}`,
+        query: {
           'includes[]': ['user', 'scanlation_group'],
           'translatedLanguage[]': [lang],
           'order[chapter]': 'desc',
           limit: '500',
         },
       })
+      
+      const data: ChapterResponse = response
 
-      const data: ChapterResponse = response.data
-
-      if (!data || !data.data || !Array.isArray(data.data)) {
-        throw new Error('No valid chapters found in response')
-      }
+      // if (!data || !data.data || !Array.isArray(data.data)) {
+      //   throw new Error('No valid chapters found in response')
+      // }
 
       return data.data.map((chapter) => {
         const group = chapter.relationships.find((rel) => rel.type === 'scanlation_group')
@@ -243,18 +246,20 @@ export class MangaService {
   async getTopManga(): Promise<Manga[]> {
     try {
       const randomOffset = Math.floor(Math.random() * 201)
-      const response = await this.api.get('/manga', {
-        params: {
+      const response = await $fetch('/api/mangadex/top', {
+        key: 'top-manga',
+        query: {
           limit: 100,
           'order[rating]': 'desc',
           'includes[]': 'cover_art',
           offset: randomOffset,
-        },
+      },
       })
 
       const data = response.data
+      
 
-      const topManga: Manga[] = this.transformMangaData(data.data)
+      const topManga: Manga[] = this.transformMangaData(data)
 
       return ArrayUtils.FisherYatesShuffle<Manga>(topManga)
     } catch (error) {
@@ -265,12 +270,14 @@ export class MangaService {
 
   async getChapter(chapterId: string): Promise<{ chapterData: Chapter; mangaId: string }> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/chapter/${chapterId}?includes[]=manga&includes[]=scanlation_group`,
-      )
-      if (!response.ok) throw new Error('Failed to fetch chapter')
-
-      const data = await response.json()
+      const response = await $fetch(`/api/mangadex/chapter/${chapterId}`, {
+        key: 'manga-chapter',
+        query: {
+         'includes[]': ['manga', 'scanlation_group'],
+        }
+      })
+      const data = response
+      
       const chapter = data.data
 
       const mangaData: MangaData = chapter.relationships.find(
@@ -306,10 +313,10 @@ export class MangaService {
 
   async getChapterPages(chapterId: string): Promise<string[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/at-home/server/${chapterId}`)
-      if (!response.ok) throw new Error('Failed to fetch chapter pages')
+      const response = await $fetch(`/api/mangadex/at-home/server/${chapterId}`)
 
-      const data = await response.json()
+      const data = response
+      
       const { baseUrl, chapter } = data
 
       return chapter.dataSaver.map(
@@ -329,11 +336,12 @@ export class MangaService {
     }[]
   > {
     try {
-      const response = await this.api.get(`/chapter/${chapterId}`)
-      if (!response?.data?.data) {
+      const response = await $fetch(`/api/mangadex/chapter/${chapterId}`)
+      if (!response?.data) {
         throw new Error('Failed to fetch chapter data')
       }
-      const currentChapter = response.data.data
+      
+      const currentChapter = response.data
       const mangaRelation = currentChapter.relationships.find(
         (rel: Relationship) => rel.type === 'manga',
       )
@@ -346,15 +354,15 @@ export class MangaService {
       )
       const lang = savedSettings.lang === '0' ? 'vi' : 'en'
       const mangaId = mangaRelation.id
-      const chapterListResponse = await this.api.get(`/manga/${mangaId}/feed`, {
-        params: {
+      const chapterListResponse = await $fetch(`/api/mangadex/${mangaId}/feed`, {
+        query: {
           limit: 500,
           'order[chapter]': 'desc',
           'translatedLanguage[]': [lang],
         },
       })
 
-      const chapters = chapterListResponse?.data?.data
+      const chapters = chapterListResponse?.data
       if (!chapters || !Array.isArray(chapters)) {
         throw new Error('No chapters found for this manga')
       }
@@ -372,11 +380,11 @@ export class MangaService {
 
   async getNextChapters(chapterId: string): Promise<string | null> {
     try {
-      const response = await this.api.get(`/chapter/${chapterId}`)
-      if (!response?.data?.data) {
+      const response = await $fetch(`/api/mangadex/chapter/${chapterId}`)
+      if (!response?.data) {
         throw new Error('Failed to fetch chapter data')
       }
-      const currentChapter = response.data.data
+      const currentChapter = response.data
       const mangaRelation = currentChapter.relationships.find(
         (rel: Relationship) => rel.type === 'manga',
       )
@@ -391,18 +399,18 @@ export class MangaService {
 
       const mangaId = mangaRelation.id
       const currentChapterNumber = parseFloat(currentChapter.attributes.chapter || '0')
-      const chaptersResponse = await this.api.get(`/manga/${mangaId}/feed`, {
-        params: {
+      const chaptersResponse = await $fetch(`/api/mangadex/${mangaId}/feed`, {
+        query: {
           'translatedLanguage[]': [lang],
           'order[chapter]': 'asc',
           limit: '500',
         },
       })
-      if (!chaptersResponse?.data?.data) {
+      if (!chaptersResponse?.data) {
         throw new Error('Failed to fetch manga chapters')
       }
 
-      const chapters = chaptersResponse.data.data
+      const chapters = chaptersResponse.data
 
       const nextChapters: Chapter[] = chapters
         .map((chapter: ChapterData) => ({
@@ -424,11 +432,12 @@ export class MangaService {
 
   async getPreviousChapter(chapterId: string): Promise<string | null> {
     try {
-      const response = await this.api.get(`/chapter/${chapterId}`)
-      if (!response?.data?.data) {
+      const response = await $fetch(`/api/mangadex/chapter/${chapterId}`)
+      
+      if (!response?.data) {
         throw new Error('Failed to fetch chapter data')
       }
-      const currentChapter = response.data.data
+      const currentChapter = response.data
       const mangaRelation = currentChapter.relationships.find(
         (rel: Relationship) => rel.type === 'manga',
       )
@@ -442,18 +451,18 @@ export class MangaService {
       const lang = savedSettings.lang === '0' ? 'vi' : 'en'
       const mangaId = mangaRelation.id
       const currentChapterNumber = parseFloat(currentChapter.attributes.chapter || '0')
-      const chaptersResponse = await this.api.get(`/manga/${mangaId}/feed`, {
-        params: {
+      const chaptersResponse = await $fetch(`/api/mangadex/${mangaId}/feed`, {
+        query: {
           'translatedLanguage[]': [lang],
           'order[chapter]': 'desc',
           limit: '500',
         },
       })
-      if (!chaptersResponse?.data?.data) {
+      if (!chaptersResponse?.data) {
         throw new Error('Failed to fetch manga chapters')
       }
 
-      const chapters = chaptersResponse.data.data
+      const chapters = chaptersResponse.data
       const previousChapters: Chapter[] = chapters
         .map((chapter: ChapterData) => ({
           id: chapter.id,
@@ -553,9 +562,8 @@ export class MangaService {
 
   async getTagsManga() {
     try {
-      const response = await this.api.get('/manga/tag')
+      return await $fetch('/api/mangadex/tag')
 
-      return response
     } catch (error) {
       throw new Error(error as string)
     }
@@ -578,9 +586,12 @@ export class MangaService {
       params['status[]'] = status
     }
     try {
-      const response = await this.api.get('/manga', { params })
+      const response = await $fetch('/api/mangadex/search', {
+        key: 'manga-filter',
+        query: params
+      })
 
-      const mangaList: MangaData[] = response.data.data
+      const mangaList: MangaData[] = response.data
 
       return this.transformMangaData(mangaList)
     } catch (error) {

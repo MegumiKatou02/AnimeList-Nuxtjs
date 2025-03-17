@@ -72,8 +72,8 @@
   
   <script lang="ts">
   import { defineComponent } from 'vue'
-  import AnimatedNumber from '@/components/AnimatedNumber.vue'
-  import WaifuShowcase from '@/components/WaifuShowcase.vue'
+  import AnimatedNumber from '~/components/AnimatedNumber.vue'
+  import WaifuShowcase from '~/components/WaifuShowcase.vue'
   import { mainInformation } from '~/composables/configs/config'
   
   export default defineComponent({

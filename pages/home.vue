@@ -1,7 +1,9 @@
 <template>
     <div class="home" :class="{ 'dark-mode': isDarkMode }">
       <div class="header">
-        <MediaTypeSwitcher @change="handleMediaTypeChange" />
+        <ClientOnly>
+          <MediaTypeSwitcher @change="handleMediaTypeChange" />
+        </ClientOnly>
         <AnimeFilter @filter="handleFilter" />
       </div>
   

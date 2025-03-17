@@ -192,7 +192,9 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
       const loadMangaData = async () => {
         try {
           const mangaId = route.params.id as string
+          
           const mangaById = await mangaService.getMangaById(mangaId)
+          
           const mangaData = mangaService.transformMangaDetail(mangaById)
   
           if (mangaData.description) {
@@ -238,7 +240,9 @@ import { getLocalStorage } from '~/composables/utils/useLocalStorage'
   
       onMounted(async () => {
         try {
-          await Promise.all([loadMangaData(), loadChapters()])
+          // await Promise.all([loadMangaData(), loadChapters()])
+          await loadMangaData();
+          await loadChapters();
         } catch (error) {
           console.error('Lỗi khi tải dữ liệu:', error)
         }

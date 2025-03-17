@@ -1,7 +1,7 @@
 <template>
     <div class="app-container" :class="{ 'dark-mode': isDarkMode }">
       <header v-if="showHeader">
-        <nav class="navbar" :class="{ 'reader-page': isReaderPage }">
+        <nav class="navbar" :class="{ 'reader-page': isReaderPage || isErrorPage }">
           <router-link to="/home">
             <div class="nav-brand">
               <img
@@ -36,7 +36,7 @@
         <slot />
       </main>
   
-      <footer v-if="showFooter">
+      <footer v-if="showFooter" >
         <div class="footer-content">
           <div class="footer-text">
             <p>Được hỗ trợ bởi</p>
@@ -71,7 +71,7 @@
     // import { isDarkMode } from '~/composables/utils/settings';
     import Login from '~/components/Login.vue';
     import type { SettingsResponse } from '~/composables/types/settings';
-import { fetchSettingsMode } from '~/composables/utils/settings';
+    import { fetchSettingsMode } from '~/composables/utils/settings';
   
   export default defineComponent({
     components: {
@@ -84,6 +84,8 @@ import { fetchSettingsMode } from '~/composables/utils/settings';
       const showHeader = computed(() => route.meta.showHeader !== false)
       const showFooter = computed(() => route.meta.showFooter !== false)
       const isReaderPage = computed(() => route.path.startsWith('/read'))
+      const isErrorPage = computed(() => route.path.startsWith('/error'))
+
       const isStatusPage = computed(() => {
         if (route.query.status && route.query.status === 'error') {
           return true
@@ -166,6 +168,7 @@ import { fetchSettingsMode } from '~/composables/utils/settings';
   
       return {
         isReaderPage,
+        isErrorPage,
         showHeader,
         showFooter,
         isStatusPage,

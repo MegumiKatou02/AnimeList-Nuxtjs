@@ -11,9 +11,9 @@
           <a class="btn" @click="toggleConsoleGuide">Hướng dẫn báo lỗi</a>
         </div>
         <div v-if="showConsoleGuide" class="console-guide">
-          <img src="@/assets/bug.png" class="console-guide-image" alt="Console guide" />
+          <!-- <img src="@/assets/bug.png" class="console-guide-image" alt="Console guide" /> -->
           <p>
-            Mở console (F12), chụp màn hình và báo cáo cho mình tại
+            copy <span style="color: black;">{{ errorMessage }}</span> và gửi cho mình tại
             <a
               :href="mainInformation.link.web.github_issues"
               target="_blank"

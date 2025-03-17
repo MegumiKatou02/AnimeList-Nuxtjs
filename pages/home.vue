@@ -81,6 +81,7 @@
   import AnimeCard from '~/components/AnimeCard.vue'
   import MangaCard from '~/components/MangaCard.vue'
   import AnimeFilter from '~/components/AnimeFilter.vue'
+import { fetchSettingsMode } from '~/composables/utils/settings'
 
   type MediaItem = Anime | Manga
   
@@ -316,6 +317,7 @@
   
       onMounted(async () => {
         window.scrollTo(0, 0)
+        isDarkMode.value = await fetchSettingsMode()
         const mediaType = getLocalStorage('activeTab')
         handleMediaTypeChange(mediaType === 'anime' || mediaType === 'manga' ? mediaType : 'anime')
   

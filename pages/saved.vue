@@ -90,8 +90,9 @@
   import { db } from '~/composables/configs/firebase'
   import { getDiscordUser, refreshToken } from '~/composables/services/discordApi'
   import type { User } from '~/composables/types/discord'
-  import { isDarkMode } from '~/composables/utils/settings'
+  // import { isDarkMode } from '~/composables/utils/settings'
   import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+import { fetchSettingsMode } from '~/composables/utils/settings'
   
   interface Item {
     id: string
@@ -103,6 +104,7 @@
   export default defineComponent({
     name: 'SavedItemsPage',
     setup() {
+      const isDarkMode = ref(false)
       const savedItems = ref<Item[]>([])
       const loading = ref(true)
       const activeFilter = ref('all')
@@ -181,7 +183,8 @@
         }
       }
   
-      onMounted(() => {
+      onMounted(async () => {
+        isDarkMode.value = await fetchSettingsMode()
         document.title = ' danh sách Anime/Manga đã lưu'
         fetchSavedItems()
       })

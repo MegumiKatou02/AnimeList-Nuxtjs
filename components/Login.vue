@@ -59,6 +59,7 @@ import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLoca
   export default defineComponent({
     name: 'LoginPage',
     setup(_, { emit }) {
+      const route = useRoute()
       const router = useRouter()
   
       const closeLogin = () => {
@@ -80,7 +81,9 @@ import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLoca
   
       const goToSavedItems = () => {
         if (!getLocalStorage('discord_token')) {
-          alert('Vui lòng đăng nhập để xem danh sách đã lưu')
+          if (import.meta.client) {
+            alert('Vui lòng đăng nhập để xem danh sách đã lưu');
+          }
           return
         }
   
@@ -93,6 +96,7 @@ import { getLocalStorage, removeLocalStorage } from '~/composables/utils/useLoca
         
         const redirectUri = encodeURIComponent(import.meta.env.VITE_DISCORD_REDIRECT_URI)
   
+        sessionStorage.setItem('previousPage', route.fullPath);
         return `https://discord.com/oauth2/authorize?client_id=${clientID}&response_type=code&redirect_uri=${redirectUri}&scope=identify`
       })
   

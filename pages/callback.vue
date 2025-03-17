@@ -12,7 +12,7 @@
   import { isDarkMode } from '~/composables/utils/settings'
   import { defineComponent } from 'vue'
   import { useRouter } from 'vue-router'
-import { setLocalStorage } from '~/composables/utils/useLocalStorage'
+  import { setLocalStorage } from '~/composables/utils/useLocalStorage'
   
   export default defineComponent({
     name: 'CallBack',
@@ -23,7 +23,9 @@ import { setLocalStorage } from '~/composables/utils/useLocalStorage'
   
       if (!code) {
         // huỷ trong khi đang xác thực
-        router.go(-2)
+        const redirectPath = sessionStorage.getItem('previousPage') || '/';
+        sessionStorage.removeItem('previousPage');
+        router.push(redirectPath);
         return
       }
   
@@ -40,8 +42,11 @@ import { setLocalStorage } from '~/composables/utils/useLocalStorage'
   
         await createUserInFirestore(user)
   
-        // -1: /callback -> -2
-        this.$router.go(-2)
+        // back lại
+        const redirectPath = sessionStorage.getItem('previousPage') || '/';
+        sessionStorage.removeItem('previousPage');
+        router.push(redirectPath);
+        
       } catch (error) {
         console.error('Error during login:', error)
       }

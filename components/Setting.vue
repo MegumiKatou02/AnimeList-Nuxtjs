@@ -74,13 +74,9 @@
       })
   
       const handleSave = async () => {
-        // if (typeof window !== 'undefined') {
-        //     setLocalStorage('setting', JSON.stringify(settings.value))
-        // }
         try {
           
           const lang = selectedLanguage.value === '0' ? 'vi' : 'en';
-          console.log('setup', lang);
           await $fetch('/api/settings', {
             method: 'POST',
             body: {
@@ -97,16 +93,8 @@
       }
   
       onMounted(async () => {
-        // const savedSettings = JSON.parse(
-        //   getLocalStorage('setting') || `{"lang":"0","theme":"0"}`,
-        // )
-        // selectedLanguage.value = savedSettings.lang
-        // selectedTheme.value = savedSettings.theme
-        // originDarkMode.value = isDarkMode.value
         try {
           const data = await $fetch<SettingsResponse>('/api/settings')
-          console.log(data);
-          
 
           if (data) {
             const lang = data.lang === 'vi' ? '0' : '1'

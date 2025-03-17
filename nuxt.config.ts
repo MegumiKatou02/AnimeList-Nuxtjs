@@ -2,9 +2,9 @@
 import envCompatible from 'vite-plugin-env-compatible'
 
 export default defineNuxtConfig({
-  // vite: {
-  //   plugins: [envCompatible()],
-  // },
+  vite: {
+    plugins: [envCompatible()],
+  },
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   css: [
@@ -14,10 +14,10 @@ export default defineNuxtConfig({
     MAL_CLIENT_ID: process.env.NUXT_CLIENT_ID_MYANIMELIST
   },
 
-  // modules: [
-  //   '@nuxt/devtools',
-  //   '@nuxt-alt/proxy',
-  // ],
+  modules: [
+    '@nuxt/devtools',
+    '@nuxt-alt/proxy',
+  ],
   // nitro: {
   //   devProxy: {
   //     '/api/': {

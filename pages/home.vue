@@ -78,12 +78,15 @@
   // import { isDarkMode } from '~/composables/utils/settings'
   import { defineAsyncComponent } from 'vue'
   import { getLocalStorage } from '~/composables/utils/useLocalStorage'
-  
+  import AnimeCard from '~/components/AnimeCard.vue'
+  import MangaCard from '~/components/MangaCard.vue'
+  import AnimeFilter from '~/components/AnimeFilter.vue'
+
   type MediaItem = Anime | Manga
   
-  const AnimeCard = defineAsyncComponent(() => import('~/components/AnimeCard.vue'))
-  const MangaCard = defineAsyncComponent(() => import('~/components/MangaCard.vue'))
-  const AnimeFilter = defineAsyncComponent(() => import('~/components/AnimeFilter.vue'))
+  // const AnimeCard = defineAsyncComponent(() => import('~/components/AnimeCard.vue'))
+  // const MangaCard = defineAsyncComponent(() => import('~/components/MangaCard.vue'))
+  // const AnimeFilter = defineAsyncComponent(() => import('~/components/AnimeFilter.vue'))
   
   export default defineComponent({
     name: 'HomePage',

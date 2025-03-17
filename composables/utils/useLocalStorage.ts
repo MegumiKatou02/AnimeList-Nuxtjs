@@ -2,6 +2,7 @@ export const getLocalStorage = (key: string) => {
     if (import.meta.client) {
       return localStorage.getItem(key);
     }
+    
     return null;
   };
 

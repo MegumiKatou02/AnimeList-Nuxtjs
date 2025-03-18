@@ -108,171 +108,145 @@
     </div>
   </template>
   
-  <script lang="ts">
-  import { defineComponent, ref, onMounted } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import type { Manga, Chapter } from '~/composables/types/manga'
-  import { MangaService } from '~/composables/services/mangaApi'
-  import ChapterModal from '~/components/ChapterModal.vue'
-  // import { isDarkMode } from '~/composables/utils/settings'
-  import { onUnmounted } from 'vue'
-  import SaveModel from '~/components/SaveModel.vue'
-  import { saveToFirestore } from '~/composables/services/firestoreService'
-  import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
-  import type { User } from '~/composables/types/discord'
-  import { getLocalStorage } from '~/composables/utils/useLocalStorage'
-  import { fetchSettingsMode } from '~/composables/utils/settings'
-  
-  export default defineComponent({
-    name: 'MangaDetail',
-    components: {
-      ChapterModal,
-      SaveModel,
-    },
-    setup() {
-      const isDarkMode = ref(false)
-      const route = useRoute()
-      const router = useRouter()
-      const mangaService = new MangaService()
-      const manga = ref<Manga | null>(null)
-      const newChapters = ref('')
-      const statistics = ref()
-      const chapters = ref<Chapter[]>([])
-      const loading = ref(true)
-  
-      const sendData = async () => {
-        let token = getLocalStorage('discord_token')
-  
-        if (!(await checkToken(token)) || !getLocalStorage('token_expiry')) {
-          // router.error
-          router.push({
-            path: '/error',
-            query: { message: 'Không tìm thấy mã xác thực' },
-          })
-          return
-        }
-  
-        const tokenExpiry = parseInt(getLocalStorage('token_expiry') as string)
-        if (!token || Date.now() >= tokenExpiry) {
-          token = await refreshToken()
-        }
-        const user: User = await getDiscordUser(token)
-        const url = window.location.href
-        const id = manga.value?.id || (route.params.id as string)
-  
-        await saveToFirestore(user.id, 'manga', manga.value?.title || 'Ukknown', url, id)
-      }
-  
-      const loadChapters = async () => {
-        try {
-          const mangaId = route.params.id as string
-          const chaptersData = await mangaService.getMangaChapters(mangaId)
-  
-          chapters.value = chaptersData
-        } catch (error) {
-          console.error(`Lỗi khi tải các chương: (${error})`)
-        }
-      }
-  
-      const cleanDescription = (text: string) => {
-        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
-  
-        text = text.replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1')
-  
-        text = text.replace(/[*_]/g, '')
-  
-        text = text.replace(/\s+/g, ' ')
-  
-        text = text
-          .split('\n')
-          .filter((line) => !line.trim().startsWith('-') && !line.trim().startsWith('Links:'))
-          .join(' ')
-  
-        return text.trim()
-      }
-  
-      const loadMangaData = async () => {
-        try {
-          const mangaId = route.params.id as string
-          
-          const mangaById = await mangaService.getMangaById(mangaId)
-          
-          const mangaData = mangaService.transformMangaDetail(mangaById)
-  
-          if (mangaData.description) {
-            mangaData.description = cleanDescription(mangaData.description)
-          }
-          manga.value = mangaData
-          document.title = manga.value.title || 'Anime List'
-  
-          statistics.value = await mangaService.getStatisticsManga(mangaId)
-  
-          if (mangaById.attributes.lastChapter === '') {
-            if (manga.value.status.toLowerCase() === 'completed') {
-              newChapters.value = 'oneshot'
-            } else newChapters.value = 'chưa có'
-          } else {
-            newChapters.value = mangaById.attributes.lastChapter
-          }
-        } catch (error: unknown) {
-          router.push({
-            path: '/error',
-            query: {
-              message: error instanceof Error ? error.message : String(error),
-            },
-          })
-        }
-      }
-  
-      const formatStatus = (status: string) => {
-        const statusMap: Record<string, string> = {
-          ongoing: 'Đang tiến hành',
-          completed: 'Hoàn thành',
-          hiatus: 'Tạm ngưng',
-          cancelled: 'Đã hủy',
-        }
-        return statusMap[status.toLowerCase()] || status
-      }
-  
-      const formatRating = (rating: number) => rating.toFixed(2)
-  
-      const getMangaDexUrl = (mangaDexId: string) => {
-        return `https://mangadex.org/title/${mangaDexId}`
-      }
-  
-      onMounted(async () => {
-        try {
-          // await Promise.all([loadMangaData(), loadChapters()])
-          await loadMangaData();
-          await loadChapters();
-          isDarkMode.value = await fetchSettingsMode()
-        } catch (error) {
-          console.error('Lỗi khi tải dữ liệu:', error)
-        }
-        loading.value = false
-      })
-  
-      onUnmounted(() => {})
-  
-      return {
-        sendData,
-        manga,
-        newChapters,
-        formatStatus,
-        getMangaDexUrl,
-        formatRating,
-        statistics,
-        chapters,
-        isDarkMode,
-        loading,
-      }
-    },
-  })
-  </script>
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import type { Manga, Chapter } from '~/composables/types/manga'
+import { MangaService } from '~/composables/services/mangaApi'
+import ChapterModal from '~/components/ChapterModal.vue'
+import { onUnmounted } from 'vue'
+import SaveModel from '~/components/SaveModel.vue'
+import { saveToFirestore } from '~/composables/services/firestoreService'
+import { checkToken, getDiscordUser, refreshToken } from '~/composables/services/discordApi'
+import type { User } from '~/composables/types/discord'
+import { getLocalStorage } from '~/composables/utils/useLocalStorage'
+import { fetchSettingsMode } from '~/composables/utils/settings'
+
+const isDarkMode = ref(false)
+const route = useRoute()
+const router = useRouter()
+const mangaService = new MangaService()
+const manga = ref<Manga | null>(null)
+const newChapters = ref('')
+const statistics = ref()
+const chapters = ref<Chapter[]>([])
+const loading = ref(true)
+
+const sendData = async () => {
+  let token = getLocalStorage('discord_token')
+
+  if (!(await checkToken(token)) || !getLocalStorage('token_expiry')) {
+    // router.error
+    router.push({
+      path: '/error',
+      query: { message: 'Không tìm thấy mã xác thực' },
+    })
+    return
+  }
+
+  const tokenExpiry = parseInt(getLocalStorage('token_expiry') as string)
+  if (!token || Date.now() >= tokenExpiry) {
+    token = await refreshToken()
+  }
+  const user: User = await getDiscordUser(token)
+  const url = window.location.href
+  const id = manga.value?.id || (route.params.id as string)
+
+  await saveToFirestore(user.id, 'manga', manga.value?.title || 'Ukknown', url, id)
+}
+
+const loadChapters = async () => {
+  try {
+    const mangaId = route.params.id as string
+    const chaptersData = await mangaService.getMangaChapters(mangaId)
+
+    chapters.value = chaptersData
+  } catch (error) {
+    console.error(`Lỗi khi tải các chương: (${error})`)
+  }
+}
+
+const cleanDescription = (text: string) => {
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+
+  text = text.replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, '$1')
+
+  text = text.replace(/[*_]/g, '')
+
+  text = text.replace(/\s+/g, ' ')
+
+  text = text
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('-') && !line.trim().startsWith('Links:'))
+    .join(' ')
+
+  return text.trim()
+}
+
+const loadMangaData = async () => {
+  try {
+    const mangaId = route.params.id as string
+    
+    const mangaById = await mangaService.getMangaById(mangaId)
+    
+    const mangaData = mangaService.transformMangaDetail(mangaById)
+
+    if (mangaData.description) {
+      mangaData.description = cleanDescription(mangaData.description)
+    }
+    manga.value = mangaData
+    document.title = manga.value.title || 'Anime List'
+
+    statistics.value = await mangaService.getStatisticsManga(mangaId)
+
+    if (mangaById.attributes.lastChapter === '') {
+      if (manga.value.status.toLowerCase() === 'completed') {
+        newChapters.value = 'oneshot'
+      } else newChapters.value = 'chưa có'
+    } else {
+      newChapters.value = mangaById.attributes.lastChapter
+    }
+  } catch (error: unknown) {
+    router.push({
+      path: '/error',
+      query: {
+        message: error instanceof Error ? error.message : String(error),
+      },
+    })
+  }
+}
+
+const formatStatus = (status: string) => {
+  const statusMap: Record<string, string> = {
+    ongoing: 'Đang tiến hành',
+    completed: 'Hoàn thành',
+    hiatus: 'Tạm ngưng',
+    cancelled: 'Đã hủy',
+  }
+  return statusMap[status.toLowerCase()] || status
+}
+
+const formatRating = (rating: number) => rating.toFixed(2)
+
+const getMangaDexUrl = (mangaDexId: string) => {
+  return `https://mangadex.org/title/${mangaDexId}`
+}
+
+onMounted(async () => {
+  try {
+    await Promise.all([loadMangaData(), loadChapters()])
+    isDarkMode.value = await fetchSettingsMode()
+  } catch (error) {
+    console.error('Lỗi khi tải dữ liệu:', error)
+  }
+  loading.value = false
+})
+
+onUnmounted(() => {})
+</script>
   
   <style scoped>
   .manga-detail-container {
-    /* max-width: 1200px; */
     width: 100%;
     margin: 0 auto;
     padding: 2rem;

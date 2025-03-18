@@ -19,39 +19,26 @@ export default defineNuxtConfig({
     '@nuxt/devtools',
     '@nuxt-alt/proxy',
   ],
-  // nitro: {
-  //   devProxy: {
-  //     '/api/': {
-  //       target: 'https://api.myanimelist.net/v2',
-  //       changeOrigin: true,
-  //       prependPath: false,
-  //       headers: {
-  //         'X-MAL-CLIENT-ID': `39bd5673e38f2ddd2bae2518e57b5b04`
-  //       }
-  //     },
-  //     '/mangadex-api/': {
-  //       target: 'https://api.mangadex.org',
-  //       changeOrigin: true,
-  //       prependPath: false,
-  //     },
-  //     '/mangadex-covers/': {
-  //       target: 'https://uploads.mangadex.org',
-  //       changeOrigin: true,
-  //       prependPath: false,
-  //       headers: {
-  //         Referer: 'https://mangadex.org',
-  //         'Cache-Control': 'no-cache',
-  //       },
-  //     },
-  //   },
-  // },
-
+  nitro: {
+    prerender: {
+      routes: ['/'],
+      crawlLinks: true,
+    }
+  },
+  experimental: {
+    payloadExtraction: true
+  },
   app: {
     head: {
+      htmlAttrs: {
+        lang: 'vi'
+      },
       title: "Anime List",
       meta: [
         { name: "viewport", content: "width=device-width, initial-scale=1.0" },
         { name: "referrer", content: "same-origin" },
+        { property: 'og:site_name', content: 'Manga Reader' },
+        { property: 'og:type', content: 'website' },
       ],
       link: [
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
